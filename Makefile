@@ -66,7 +66,7 @@ build@debian-jessie:
 	    '
 
 build-package@debian-wheezy:
-	echo "deb-src http://httpredir.debian.org/debian testing main contrib non-free" > /etc/apt/sources.list.d/testing.list
+	echo "deb-src http://httpredir.debian.org/debian ${PACKAGE_DISTRIBUTION} main contrib non-free" > /etc/apt/sources.list.d/${PACKAGE_DISTRIBUTION}.list
 	echo "deb http://httpredir.debian.org/debian wheezy-backports main" > /etc/apt/sources.list.d/backports.list
 	apt-get update
 	apt-get -y install devscripts
@@ -77,7 +77,7 @@ build-package@debian-wheezy:
 	mkdir -p /srv/build && mv ~/*.deb /srv/build
 
 build-package@debian-jessie:
-	echo "deb-src http://httpredir.debian.org/debian testing main contrib non-free" > /etc/apt/sources.list.d/testing.list
+	echo "deb-src http://httpredir.debian.org/debian ${PACKAGE_DISTRIBUTION} main contrib non-free" > /etc/apt/sources.list.d/${PACKAGE_DISTRIBUTION}.list
 	apt-get update
 	apt-get -y install devscripts
 	apt-get -y --only-source build-dep ${PACKAGE_NAME}/${PACKAGE_DISTRIBUTION}
