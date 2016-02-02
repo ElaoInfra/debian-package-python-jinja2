@@ -6,6 +6,19 @@ COLOR_RESET   = \033[0m
 COLOR_INFO    = \033[32m
 COLOR_COMMENT = \033[33m
 
+## Package
+PACKAGE_NAME            = jinja2
+PACKAGE_DISTRIBUTION    = testing
+PACKAGE_VERSION         = 2.8
+PACKAGE_REVISION        = 1
+PACKAGE_REVISION_ELAO   = 1
+PACKAGE_REVISION_WHEEZY = 1
+PACKAGE_REVISION_JESSIE = 1
+
+## Maintainer
+MAINTAINER_NAME  = Elao Infra
+MAINTAINER_EMAIL = infra@elao.com
+
 ## Help
 help:
 	printf "${COLOR_COMMENT}Usage:${COLOR_RESET}\n"
@@ -33,8 +46,8 @@ build@debian-wheezy:
 	    debian:wheezy \
 	    sh -c '\
 	        apt-get update && \
-	        apt-get upgrade && \
-	        apt-get install -y make && \
+	        apt-get -y upgrade && \
+	        apt-get -y install make && \
 	        make build-package@debian-wheezy \
 	    '
 
@@ -47,8 +60,8 @@ build@debian-jessie:
 	    debian:jessie \
 	    sh -c '\
 	        apt-get update && \
-	        apt-get upgrade && \
-	        apt-get install -y make && \
+	        apt-get -y upgrade && \
+	        apt-get -y install make && \
 	        make build-package@debian-jessie \
 	    '
 
@@ -56,13 +69,19 @@ build-package@debian-wheezy:
 	echo "deb-src http://httpredir.debian.org/debian testing main contrib non-free" > /etc/apt/sources.list.d/testing.list
 	echo "deb http://httpredir.debian.org/debian wheezy-backports main" > /etc/apt/sources.list.d/backports.list
 	apt-get update
-	apt-get build-dep --only-source -y jinja2/testing
-	cd ~ && apt-get -b source --only-source -y jinja2/testing
-	mv ~/*.deb /srv/build/debian-wheezy
+	apt-get -y install devscripts
+	apt-get -y --only-source build-dep ${PACKAGE_NAME}/${PACKAGE_DISTRIBUTION}
+	cd ~ && apt-get -y --only-source source ${PACKAGE_NAME}/${PACKAGE_DISTRIBUTION}
+	cd ~ && cd ${PACKAGE_NAME}-${PACKAGE_VERSION} && DEBFULLNAME="${MAINTAINER_NAME}" DEBEMAIL="${MAINTAINER_EMAIL}" dch -v ${PACKAGE_VERSION}-${PACKAGE_REVISION}elao${PACKAGE_REVISION_ELAO}~wheezy${PACKAGE_REVISION_WHEEZY} "Backport"
+	cd ~ && cd ${PACKAGE_NAME}-${PACKAGE_VERSION} && debuild -us -uc
+	mkdir -p /srv/build && mv ~/*.deb /srv/build
 
 build-package@debian-jessie:
 	echo "deb-src http://httpredir.debian.org/debian testing main contrib non-free" > /etc/apt/sources.list.d/testing.list
 	apt-get update
-	apt-get build-dep --only-source -y jinja2/testing
-	cd ~ && apt-get -b source --only-source -y jinja2/testing
-	mv ~/*.deb /srv/build/debian-jessie
+	apt-get -y install devscripts
+	apt-get -y --only-source build-dep ${PACKAGE_NAME}/${PACKAGE_DISTRIBUTION}
+	cd ~ && apt-get -y --only-source source ${PACKAGE_NAME}/${PACKAGE_DISTRIBUTION}
+	cd ~ && cd ${PACKAGE_NAME}-${PACKAGE_VERSION} && DEBFULLNAME="${MAINTAINER_NAME}" DEBEMAIL="${MAINTAINER_EMAIL}" dch -v ${PACKAGE_VERSION}-${PACKAGE_REVISION}elao${PACKAGE_REVISION_ELAO}~jessie${PACKAGE_REVISION_WHEEZY} "Backport"
+	cd ~ && cd ${PACKAGE_NAME}-${PACKAGE_VERSION} && debuild -us -uc
+	mkdir -p /srv/build && mv ~/*.deb /srv/build
