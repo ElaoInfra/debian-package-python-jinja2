@@ -19,6 +19,20 @@ PACKAGE_REVISION_JESSIE = 1
 MAINTAINER_NAME  = Elao Infra
 MAINTAINER_EMAIL = infra@elao.com
 
+## Macros
+DOCKER = docker run \
+    --rm \
+    --volume `pwd`:/srv \
+    --workdir /srv \
+    --tty \
+    debian:${DEBIAN_DISTRIBUTION} \
+    sh -c '\
+        apt-get update && \
+        apt-get -y upgrade && \
+        apt-get -y install make && \
+        make build-package@debian-${DEBIAN_DISTRIBUTION} \
+    '
+
 ## Help
 help:
 	printf "${COLOR_COMMENT}Usage:${COLOR_RESET}\n"
@@ -37,33 +51,13 @@ help:
 ## Build
 build: build@debian-wheezy build@debian-jessie
 
+build@debian-wheezy: DEBIAN_DISTRIBUTION = wheezy
 build@debian-wheezy:
-	docker run \
-	    --rm \
-	    --volume `pwd`:/srv \
-	    --workdir /srv \
-	    --tty \
-	    debian:wheezy \
-	    sh -c '\
-	        apt-get update && \
-	        apt-get -y upgrade && \
-	        apt-get -y install make && \
-	        make build-package@debian-wheezy \
-	    '
+	$(DOCKER)
 
+build@debian-jessie: DEBIAN_DISTRIBUTION = jessie
 build@debian-jessie:
-	docker run \
-	    --rm \
-	    --volume `pwd`:/srv \
-	    --workdir /srv \
-	    --tty \
-	    debian:jessie \
-	    sh -c '\
-	        apt-get update && \
-	        apt-get -y upgrade && \
-	        apt-get -y install make && \
-	        make build-package@debian-jessie \
-	    '
+	$(DOCKER)
 
 build-package@debian-wheezy:
 	echo "deb-src http://httpredir.debian.org/debian ${PACKAGE_DISTRIBUTION} main contrib non-free" > /etc/apt/sources.list.d/${PACKAGE_DISTRIBUTION}.list
